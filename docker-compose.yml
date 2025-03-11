@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: moodle-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - moodle-db-data:/var/lib/mysql
+    networks:
+      - moodle-network
+
+  app:
+    build: 
+      context: .
+      dockerfile: .docker/Dockerfile
+    container_name: moodle-app
+    restart: always
+    ports:
+      - "9090:80"
+    depends_on:
+      - db
+    environment:
+      MOODLE_DATABASE_NAME: ${DB_NAME}
+      MOODLE_DATABASE_USER: ${DB_USER}
+      MOODLE_DATABASE_PASSWORD: ${DB_PASSWORD}
+      MOODLE_DATABASE_HOST: ${DB_HOST}
+    volumes:
+      - moodle-data:/var/www/moodledata
+    networks:
+      - moodle-network
+
+volumes:
+  moodle-db-data:
+  moodle-data:
+
+networks:
+  moodle-network:
